@@ -12,11 +12,14 @@ function App() {
   const [panelWidth, setPanelWidth] = useState(1000)
   const [panelHeight, setPanelHeight] = useState(1000)
 
-  // Pieces state
+  // Pieces state (rotation enabled by default for better optimization)
   const [pieces, setPieces] = useState([
     { id: 0, width: 200, height: 150, quantity: 5, rotationAllowed: true },
-    { id: 1, width: 100, height: 100, quantity: 10, rotationAllowed: false },
+    { id: 1, width: 100, height: 100, quantity: 10, rotationAllowed: true },
   ])
+  
+  // Optimization settings
+  const [minWasteSize, setMinWasteSize] = useState(100) // mm - waste smaller than this is trash
 
   // Results state
   const [results, setResults] = useState(null)
@@ -35,6 +38,9 @@ function App() {
           width: panelWidth,
           height: panelHeight,
         },
+        settings: {
+          minWasteSize: minWasteSize,
+        },
         pieces: pieces.map(p => ({
           id: p.id,
           width: p.width,
@@ -46,7 +52,7 @@ function App() {
       setJsonConfig(JSON.stringify(config, null, 2))
       setJsonError('')
     }
-  }, [panelWidth, panelHeight, pieces, autoSync])
+  }, [panelWidth, panelHeight, pieces, minWasteSize, autoSync])
 
   // Generate color for piece type (same color for all pieces of same type)
   const getPieceTypeColor = (pieceTypeId) => {
@@ -60,7 +66,7 @@ function App() {
 
   // Handle optimization
   const handleOptimize = () => {
-    const result = optimize(panelWidth, panelHeight, pieces)
+    const result = optimize(panelWidth, panelHeight, pieces, { minWasteSize })
     setResults(result)
   }
 
@@ -70,18 +76,19 @@ function App() {
     setPanelHeight(1000)
     setPieces([
       { id: 0, width: 200, height: 150, quantity: 5, rotationAllowed: true },
-      { id: 1, width: 100, height: 100, quantity: 10, rotationAllowed: false },
+      { id: 1, width: 100, height: 100, quantity: 10, rotationAllowed: true },
     ])
+    setMinWasteSize(100)
     setResults(null)
     setShowFreeRects(false)
   }
 
-  // Add new piece
+  // Add new piece (rotation enabled by default)
   const handleAddPiece = () => {
     const newId = Math.max(...pieces.map(p => p.id), -1) + 1
     setPieces([
       ...pieces,
-      { id: newId, width: 100, height: 100, quantity: 1, rotationAllowed: false },
+      { id: newId, width: 100, height: 100, quantity: 1, rotationAllowed: true },
     ])
   }
 
@@ -114,6 +121,9 @@ function App() {
         width: panelWidth,
         height: panelHeight,
       },
+      settings: {
+        minWasteSize: minWasteSize,
+      },
       pieces: pieces.map(p => ({
         id: p.id,
         width: p.width,
@@ -143,19 +153,25 @@ function App() {
         throw new Error('Pieces must be an array')
       }
       
-      // Validate and import pieces
+      // Validate and import pieces (default rotationAllowed to true for wood cutting)
       const importedPieces = config.pieces.map((p, index) => ({
         id: p.id !== undefined ? p.id : index,
         width: Number(p.width),
         height: Number(p.height),
         quantity: Number(p.quantity),
-        rotationAllowed: Boolean(p.rotationAllowed),
+        rotationAllowed: p.rotationAllowed !== undefined ? Boolean(p.rotationAllowed) : true,
       }))
       
       // Set the configuration
       setPanelWidth(config.panel.width)
       setPanelHeight(config.panel.height)
       setPieces(importedPieces)
+      
+      // Import settings if available
+      if (config.settings && typeof config.settings.minWasteSize === 'number') {
+        setMinWasteSize(config.settings.minWasteSize)
+      }
+      
       setJsonError('')
       setAutoSync(true) // Re-enable auto-sync after import
       
@@ -182,12 +198,16 @@ function App() {
   const loadExample = () => {
     const example = {
       panel: {
-        width: 1000,
-        height: 1000,
+        width: 2440,
+        height: 1220,
+      },
+      settings: {
+        minWasteSize: 100,
       },
       pieces: [
-        { id: 0, width: 200, height: 300, quantity: 15, rotationAllowed: true },
-        { id: 1, width: 100, height: 100, quantity: 20, rotationAllowed: false },
+        { id: 0, width: 600, height: 400, quantity: 8, rotationAllowed: true },
+        { id: 1, width: 300, height: 200, quantity: 12, rotationAllowed: true },
+        { id: 2, width: 150, height: 150, quantity: 10, rotationAllowed: true },
       ],
     }
     setJsonConfig(JSON.stringify(example, null, 2))
@@ -295,6 +315,24 @@ function App() {
                       value={panelHeight}
                       onChange={(e) => setPanelHeight(Number(e.target.value))}
                     />
+                  </div>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="space-y-2">
+                    <Label htmlFor="min-waste-size">Minimum Useful Waste Size (mm)</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="min-waste-size"
+                        type="number"
+                        min="0"
+                        value={minWasteSize}
+                        onChange={(e) => setMinWasteSize(Number(e.target.value))}
+                        className="w-32"
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        Waste smaller than {minWasteSize}×{minWasteSize}mm is discarded
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -453,6 +491,16 @@ function App() {
                           {results.panels.reduce((sum, p) => sum + p.placed.length, 0)}
                         </span> pieces
                       </p>
+                      {results.stats.usableWasteArea > 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          Reusable Waste: <span className="font-medium">
+                            {(results.stats.usableWasteArea / 1000000).toFixed(3)} m²
+                          </span>
+                          <span className="text-xs ml-1">
+                            ({results.panels.reduce((sum, p) => sum + p.freeRects.length, 0)} pieces)
+                          </span>
+                        </p>
+                      )}
                       {results.rejected.length > 0 && (
                         <p className="text-sm text-destructive">
                           Rejected: <span className="font-medium">{results.rejected.length}</span>{' '}

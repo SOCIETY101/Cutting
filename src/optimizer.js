@@ -1,12 +1,16 @@
 /**
  * Guillotine-based MaxRects 2D Bin Packing Algorithm
+ * Optimized for wood cutting machines
  * 
- * This implementation uses the Best Area Fit heuristic with guillotine cuts.
- * The algorithm places rectangles in a panel by:
- * 1. Finding the free rectangle with the smallest leftover area after placement
- * 2. Splitting the free rectangle using guillotine cuts (horizontal or vertical)
- * 3. Managing a list of free rectangles and merging adjacent ones when possible
+ * This implementation uses Bottom-Left with Best Fit heuristic:
+ * 1. Places pieces from top-left to bottom-right (machine-friendly)
+ * 2. Uses vertical-first guillotine cuts (vertical cuts first, then horizontal)
+ * 3. Consolidates waste to bottom-right corner for reuse
+ * 4. Filters out small waste pieces below minimum useful size
  */
+
+// Minimum useful waste size (smaller pieces are considered trash)
+const DEFAULT_MIN_WASTE_SIZE = 100; // mm
 
 /**
  * Represents a rectangle with position and dimensions
@@ -125,110 +129,106 @@ function sortPiecesByArea(pieces) {
 }
 
 /**
- * Find the best free rectangle for placing a piece using Best Area Fit heuristic
- * Returns the free rectangle that leaves the smallest leftover area after placement
+ * Find the best free rectangle for placing a piece using Bottom-Left with Best Fit
+ * Prioritizes top-left positions for machine-friendly cutting, then tighter fits
+ * This naturally pushes waste to the bottom-right corner
  * @param {Array<Rectangle>} freeRects - List of free rectangles
  * @param {number} width - Width of piece to place
  * @param {number} height - Height of piece to place
- * @returns {Object|null} {rect: Rectangle, waste: number} or null if no fit
+ * @returns {Object|null} {rect: Rectangle, score: number} or null if no fit
  */
 function findBestFit(freeRects, width, height) {
   let bestFit = null;
-  let minWaste = Infinity;
+  let bestScore = Infinity;
 
   for (const rect of freeRects) {
     if (rect.canContain(width, height)) {
-      // Calculate leftover area (waste) after placement
+      // Bottom-Left scoring: prioritize top-left positions
+      // Score = Y position * 100000 + X position * 100 + leftover area
+      // Lower score is better (top-left positions get lower scores)
       const leftoverArea = rect.getArea() - width * height;
+      const positionScore = (rect.y * 100000) + (rect.x * 100) + (leftoverArea / 1000);
       
-      // Best Area Fit: choose rectangle with smallest leftover area
-      if (leftoverArea < minWaste) {
-        minWaste = leftoverArea;
+      if (positionScore < bestScore) {
+        bestScore = positionScore;
         bestFit = rect;
       }
     }
   }
 
-  return bestFit ? { rect: bestFit, waste: minWaste } : null;
+  return bestFit ? { rect: bestFit, score: bestScore } : null;
 }
 
 /**
  * Perform guillotine split on a free rectangle after placing a piece
- * Creates two new rectangles from the leftover space
+ * Uses VERTICAL-FIRST splitting strategy (vertical cut first, then horizontal)
+ * This is more machine-friendly and consolidates waste to bottom-right
  * @param {Rectangle} freeRect - The free rectangle that was used
  * @param {number} placedX - X position of placed rectangle
  * @param {number} placedY - Y position of placed rectangle
  * @param {number} placedWidth - Width of placed rectangle
  * @param {number} placedHeight - Height of placed rectangle
- * @returns {Array<Rectangle>} Array of new free rectangles (0-2 rectangles)
+ * @param {number} minWasteSize - Minimum size for useful waste (default 100mm)
+ * @returns {Array<Rectangle>} Array of new free rectangles
  */
-function splitRectangle(freeRect, placedX, placedY, placedWidth, placedHeight) {
+function splitRectangle(freeRect, placedX, placedY, placedWidth, placedHeight, minWasteSize = DEFAULT_MIN_WASTE_SIZE) {
   const newRects = [];
 
   // Calculate leftover space dimensions
   const rightWidth = freeRect.x + freeRect.width - (placedX + placedWidth);
   const bottomHeight = freeRect.y + freeRect.height - (placedY + placedHeight);
-  const leftWidth = placedX - freeRect.x;
-  const topHeight = placedY - freeRect.y;
 
-  // MaxRects algorithm: Create maximal rectangles for all leftover spaces
-  // These rectangles may overlap with each other (which is fine for MaxRects),
-  // but they must NOT overlap with the placed piece
+  // VERTICAL-FIRST SPLIT STRATEGY:
+  // 1. First create vertical cut: right side gets full height
+  // 2. Then create horizontal cut: bottom gets remaining width (up to placed piece)
+  // This pushes waste to bottom-right corner
   
-  // Right rectangle: space to the right of placed piece
-  // Starts at right edge of placed piece, extends to right edge of free rect
-  // Height: from top of free rect to bottom of free rect
+  // Right rectangle: full height of free rect (vertical cut first)
+  // This creates a clean vertical cut line for the machine
   if (rightWidth > 0 && freeRect.height > 0) {
-    newRects.push(
-      new Rectangle(
-        placedX + placedWidth,
-        freeRect.y,
-        rightWidth,
-        freeRect.height
-      )
-    );
+    // Only add if it's larger than trash threshold
+    if (rightWidth >= minWasteSize || freeRect.height >= minWasteSize) {
+      newRects.push(
+        new Rectangle(
+          placedX + placedWidth,
+          freeRect.y,
+          rightWidth,
+          freeRect.height
+        )
+      );
+    }
   }
 
-  // Bottom rectangle: space below placed piece
-  // Starts at bottom edge of placed piece, extends to bottom of free rect
-  // Width: from left edge of free rect to right edge of free rect
-  if (bottomHeight > 0 && freeRect.width > 0) {
-    newRects.push(
-      new Rectangle(
-        freeRect.x,
-        placedY + placedHeight,
-        freeRect.width,
-        bottomHeight
-      )
-    );
+  // Bottom rectangle: only the width up to the placed piece (horizontal cut second)
+  // This creates a clean horizontal cut line for the machine
+  if (bottomHeight > 0 && placedWidth > 0) {
+    // Only add if it's larger than trash threshold
+    if (placedWidth >= minWasteSize || bottomHeight >= minWasteSize) {
+      newRects.push(
+        new Rectangle(
+          placedX,
+          placedY + placedHeight,
+          placedWidth,
+          bottomHeight
+        )
+      );
+    }
   }
 
-  // Left rectangle: space to the left of placed piece
-  // Starts at left edge of free rect, ends at left edge of placed piece
-  // Height: from top of free rect to bottom of free rect
-  if (leftWidth > 0 && freeRect.height > 0) {
-    newRects.push(
-      new Rectangle(
-        freeRect.x,
-        freeRect.y,
-        leftWidth,
-        freeRect.height
-      )
-    );
-  }
-
-  // Top rectangle: space above placed piece
-  // Starts at top of free rect, ends at top of placed piece
-  // Width: from left edge of free rect to right edge of free rect
-  if (topHeight > 0 && freeRect.width > 0) {
-    newRects.push(
-      new Rectangle(
-        freeRect.x,
-        freeRect.y,
-        freeRect.width,
-        topHeight
-      )
-    );
+  // Bottom-left corner: if the placed piece doesn't start at freeRect.x
+  // This handles cases where there's space to the left
+  const leftWidth = placedX - freeRect.x;
+  if (leftWidth > 0 && bottomHeight > 0) {
+    if (leftWidth >= minWasteSize || bottomHeight >= minWasteSize) {
+      newRects.push(
+        new Rectangle(
+          freeRect.x,
+          placedY + placedHeight,
+          leftWidth,
+          bottomHeight
+        )
+      );
+    }
   }
 
   return newRects;
@@ -237,11 +237,13 @@ function splitRectangle(freeRect, placedX, placedY, placedWidth, placedHeight) {
 /**
  * Split free rectangles that overlap with a placed rectangle
  * Instead of removing them entirely, we split them to preserve non-overlapping portions
+ * Also filters out small waste pieces below minimum useful size
  * @param {Array<Rectangle>} freeRects - List of free rectangles
  * @param {PlacedRectangle} placedRect - The placed rectangle
+ * @param {number} minWasteSize - Minimum size for useful waste
  * @returns {Array<Rectangle>} List of free rectangles with overlaps removed/split
  */
-function removeOverlappingFreeRects(freeRects, placedRect) {
+function removeOverlappingFreeRects(freeRects, placedRect, minWasteSize = DEFAULT_MIN_WASTE_SIZE) {
   const placedRectObj = new Rectangle(
     placedRect.x,
     placedRect.y,
@@ -251,10 +253,17 @@ function removeOverlappingFreeRects(freeRects, placedRect) {
   
   const result = [];
   
+  // Helper function to check if a rectangle is large enough to keep
+  const isUsefulSize = (width, height) => {
+    return width >= minWasteSize && height >= minWasteSize;
+  };
+  
   for (const freeRect of freeRects) {
     if (!freeRect.overlaps(placedRectObj)) {
-      // No overlap, keep as is
-      result.push(freeRect);
+      // No overlap, keep if large enough
+      if (isUsefulSize(freeRect.width, freeRect.height)) {
+        result.push(freeRect);
+      }
       continue;
     }
     
@@ -262,47 +271,55 @@ function removeOverlappingFreeRects(freeRects, placedRect) {
     // Left rectangle: portion to the left of placed piece
     if (freeRect.x < placedRect.x) {
       const leftWidth = placedRect.x - freeRect.x;
-      result.push(new Rectangle(
-        freeRect.x,
-        freeRect.y,
-        leftWidth,
-        freeRect.height
-      ));
+      if (isUsefulSize(leftWidth, freeRect.height)) {
+        result.push(new Rectangle(
+          freeRect.x,
+          freeRect.y,
+          leftWidth,
+          freeRect.height
+        ));
+      }
     }
     
     // Right rectangle: portion to the right of placed piece
     const rightX = placedRect.x + placedRect.width;
     if (rightX < freeRect.x + freeRect.width) {
       const rightWidth = (freeRect.x + freeRect.width) - rightX;
-      result.push(new Rectangle(
-        rightX,
-        freeRect.y,
-        rightWidth,
-        freeRect.height
-      ));
+      if (isUsefulSize(rightWidth, freeRect.height)) {
+        result.push(new Rectangle(
+          rightX,
+          freeRect.y,
+          rightWidth,
+          freeRect.height
+        ));
+      }
     }
     
-    // Top rectangle: portion above placed piece (full width, no horizontal overlap possible)
+    // Top rectangle: portion above placed piece
     if (freeRect.y < placedRect.y) {
       const topHeight = placedRect.y - freeRect.y;
-      result.push(new Rectangle(
-        freeRect.x,
-        freeRect.y,
-        freeRect.width,
-        topHeight
-      ));
+      if (isUsefulSize(freeRect.width, topHeight)) {
+        result.push(new Rectangle(
+          freeRect.x,
+          freeRect.y,
+          freeRect.width,
+          topHeight
+        ));
+      }
     }
     
-    // Bottom rectangle: portion below placed piece (full width, no horizontal overlap possible)
+    // Bottom rectangle: portion below placed piece
     const bottomY = placedRect.y + placedRect.height;
     if (bottomY < freeRect.y + freeRect.height) {
       const bottomHeight = (freeRect.y + freeRect.height) - bottomY;
-      result.push(new Rectangle(
-        freeRect.x,
-        bottomY,
-        freeRect.width,
-        bottomHeight
-      ));
+      if (isUsefulSize(freeRect.width, bottomHeight)) {
+        result.push(new Rectangle(
+          freeRect.x,
+          bottomY,
+          freeRect.width,
+          bottomHeight
+        ));
+      }
     }
   }
   
@@ -370,14 +387,27 @@ function mergeRectangles(freeRects) {
 }
 
 /**
- * Optimize a single panel
+ * Filter out free rectangles that are too small to be useful
+ * @param {Array<Rectangle>} freeRects - List of free rectangles
+ * @param {number} minWasteSize - Minimum size for useful waste
+ * @returns {Array<Rectangle>} Filtered list of free rectangles
+ */
+function filterSmallRectangles(freeRects, minWasteSize = DEFAULT_MIN_WASTE_SIZE) {
+  return freeRects.filter(rect => 
+    rect.width >= minWasteSize && rect.height >= minWasteSize
+  );
+}
+
+/**
+ * Optimize a single panel using Bottom-Left with Best Fit algorithm
  * @param {number} panelWidth - Width of the panel in mm
  * @param {number} panelHeight - Height of the panel in mm
  * @param {Array} piecesToPlace - Array of Piece objects to place
  * @param {number} panelIndex - Index of this panel
+ * @param {number} minWasteSize - Minimum useful waste size in mm
  * @returns {Object} {placed: Array<PlacedRectangle>, remainingPieces: Array<Piece>, freeRects: Array<Rectangle>}
  */
-function optimizeSinglePanel(panelWidth, panelHeight, piecesToPlace, panelIndex = 0) {
+function optimizeSinglePanel(panelWidth, panelHeight, piecesToPlace, panelIndex = 0, minWasteSize = DEFAULT_MIN_WASTE_SIZE) {
   // Initialize free rectangles list with the entire panel
   let freeRects = [new Rectangle(0, 0, panelWidth, panelHeight)];
 
@@ -392,20 +422,20 @@ function optimizeSinglePanel(panelWidth, panelHeight, piecesToPlace, panelIndex 
     // Try original orientation first
     const fitOriginal = findBestFit(freeRects, piece.width, piece.height);
 
-    // Try rotated orientation if allowed
+    // Try rotated orientation if allowed (rotation is now preferred/default)
     let fitRotated = null;
     if (piece.rotationAllowed) {
       const rotated = piece.getRotated();
       fitRotated = findBestFit(freeRects, rotated.width, rotated.height);
     }
 
-    // Choose best fit (original or rotated)
+    // Choose best fit (original or rotated) - lower score is better
     let bestFit = null;
     let useRotated = false;
 
     if (fitOriginal && fitRotated) {
-      // Both fit, choose the one with less waste
-      if (fitRotated.waste < fitOriginal.waste) {
+      // Both fit, choose the one with better score (lower is better for bottom-left)
+      if (fitRotated.score < fitOriginal.score) {
         bestFit = fitRotated;
         useRotated = true;
       } else {
@@ -441,23 +471,27 @@ function optimizeSinglePanel(panelWidth, panelHeight, piecesToPlace, panelIndex 
       const rectIndex = freeRects.indexOf(bestFit.rect);
       freeRects.splice(rectIndex, 1);
 
-      // Split the free rectangle using guillotine cut
+      // Split the free rectangle using vertical-first guillotine cut
       const newRects = splitRectangle(
         bestFit.rect,
         placedRect.x,
         placedRect.y,
         placedRect.width,
-        placedRect.height
+        placedRect.height,
+        minWasteSize
       );
 
       // Add new free rectangles
       freeRects.push(...newRects);
 
       // Remove any free rectangles that overlap with the placed piece
-      freeRects = removeOverlappingFreeRects(freeRects, placedRect);
+      freeRects = removeOverlappingFreeRects(freeRects, placedRect, minWasteSize);
 
-      // Always merge adjacent rectangles to reduce fragmentation
+      // Always merge adjacent rectangles to consolidate waste
       freeRects = mergeRectangles(freeRects);
+      
+      // Filter out small rectangles (trash)
+      freeRects = filterSmallRectangles(freeRects, minWasteSize);
 
       placedPiece = true;
     }
@@ -477,14 +511,18 @@ function optimizeSinglePanel(panelWidth, panelHeight, piecesToPlace, panelIndex 
 
 /**
  * Main optimization function with multiple panel support
- * Implements Guillotine-based MaxRects bin packing with Best Area Fit heuristic
+ * Implements Guillotine-based bin packing with Bottom-Left Best Fit heuristic
+ * Optimized for wood cutting machines with waste consolidation
  * Creates multiple panels as needed to fit all pieces
  * @param {number} panelWidth - Width of the panel in mm
  * @param {number} panelHeight - Height of the panel in mm
  * @param {Array} pieces - Array of {id, width, height, quantity, rotationAllowed}
+ * @param {Object} options - Optional settings {minWasteSize: number}
  * @returns {Object} {panels: Array<{placed, freeRects}>, rejected: Array<Piece>, stats: Object}
  */
-export function optimize(panelWidth, panelHeight, pieces) {
+export function optimize(panelWidth, panelHeight, pieces, options = {}) {
+  const minWasteSize = options.minWasteSize ?? DEFAULT_MIN_WASTE_SIZE;
+  
   // Validate inputs
   if (panelWidth <= 0 || panelHeight <= 0) {
     return {
@@ -497,6 +535,7 @@ export function optimize(panelWidth, panelHeight, pieces) {
         usedPercentage: 0,
         wastePercentage: 100,
         panelCount: 0,
+        minWasteSize,
       },
     };
   }
@@ -505,6 +544,7 @@ export function optimize(panelWidth, panelHeight, pieces) {
   const expandedPieces = expandPieces(pieces);
 
   // Sort pieces by descending area (largest first)
+  // This helps place larger pieces first, improving overall packing
   const sortedPieces = sortPiecesByArea(expandedPieces);
 
   // Track all panels and remaining pieces
@@ -514,7 +554,7 @@ export function optimize(panelWidth, panelHeight, pieces) {
 
   // Keep creating panels until all pieces are placed or no more can fit
   while (remainingPieces.length > 0) {
-    const panelResult = optimizeSinglePanel(panelWidth, panelHeight, remainingPieces, panelIndex);
+    const panelResult = optimizeSinglePanel(panelWidth, panelHeight, remainingPieces, panelIndex, minWasteSize);
     
     panels.push({
       placed: panelResult.placed,
@@ -545,6 +585,11 @@ export function optimize(panelWidth, panelHeight, pieces) {
   const totalWasteArea = totalPanelArea - totalUsedArea;
   const usedPercentage = totalPanelArea > 0 ? (totalUsedArea / totalPanelArea) * 100 : 0;
   const wastePercentage = totalPanelArea > 0 ? (totalWasteArea / totalPanelArea) * 100 : 100;
+  
+  // Calculate usable waste (free rectangles that are large enough to keep)
+  const usableWasteArea = panels.reduce((sum, panel) => 
+    sum + panel.freeRects.reduce((rectSum, rect) => rectSum + rect.getArea(), 0), 0
+  );
 
   return {
     panels,
@@ -556,6 +601,8 @@ export function optimize(panelWidth, panelHeight, pieces) {
       usedPercentage,
       wastePercentage,
       panelCount: panels.length,
+      minWasteSize,
+      usableWasteArea,
     },
   };
 }
