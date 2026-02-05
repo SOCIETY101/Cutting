@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS projects (
   panel_height INTEGER NOT NULL DEFAULT 1000,
   min_waste_size INTEGER NOT NULL DEFAULT 100,
   is_favorite BOOLEAN DEFAULT false,
+  poignet_enabled BOOLEAN DEFAULT false,
   tags TEXT[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
@@ -159,3 +160,6 @@ CREATE TRIGGER update_projects_updated_at
   BEFORE UPDATE ON projects
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+
+-- Migration: Add poignet_enabled column if it doesn't exist (for existing databases)
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS poignet_enabled BOOLEAN DEFAULT false;

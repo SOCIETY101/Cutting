@@ -3,6 +3,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Checkbox } from '../ui/checkbox'
 import { X } from 'lucide-react'
 
 export function ProjectForm({ project, onSave, onCancel }) {
@@ -11,6 +12,7 @@ export function ProjectForm({ project, onSave, onCancel }) {
   const [panelWidth, setPanelWidth] = useState(1000)
   const [panelHeight, setPanelHeight] = useState(1000)
   const [minWasteSize, setMinWasteSize] = useState(100)
+  const [poignetEnabled, setPoignetEnabled] = useState(false)
 
   useEffect(() => {
     if (project) {
@@ -19,6 +21,7 @@ export function ProjectForm({ project, onSave, onCancel }) {
       setPanelWidth(project.panel_width || 1000)
       setPanelHeight(project.panel_height || 1000)
       setMinWasteSize(project.min_waste_size || 100)
+      setPoignetEnabled(project.poignet_enabled || false)
     }
   }, [project])
 
@@ -30,6 +33,7 @@ export function ProjectForm({ project, onSave, onCancel }) {
       panelWidth,
       panelHeight,
       minWasteSize,
+      poignetEnabled,
     })
   }
 
@@ -102,6 +106,22 @@ export function ProjectForm({ project, onSave, onCancel }) {
             <p className="text-xs text-muted-foreground">
               Waste smaller than this size will be discarded
             </p>
+          </div>
+
+          <div className="flex items-center space-x-2 pt-2 border-t">
+            <Checkbox
+              id="poignet-enabled-form"
+              checked={poignetEnabled}
+              onChange={(e) => setPoignetEnabled(e.target.checked)}
+            />
+            <div className="space-y-1">
+              <Label htmlFor="poignet-enabled-form" className="text-sm font-medium cursor-pointer">
+                Poignet Mode
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Pieces will be placed only at top or bottom rows (width edges align with panel edges)
+              </p>
+            </div>
           </div>
 
           <div className="flex gap-2 pt-4">

@@ -115,6 +115,7 @@ export const useProjects = () => {
           panel_width: projectData.panelWidth || 1000,
           panel_height: projectData.panelHeight || 1000,
           min_waste_size: projectData.minWasteSize || 100,
+          poignet_enabled: projectData.poignetEnabled || false,
           tags: projectData.tags || [],
         })
         .select()
@@ -168,6 +169,7 @@ export const useProjects = () => {
       if (updates.panelWidth !== undefined) projectUpdates.panel_width = updates.panelWidth
       if (updates.panelHeight !== undefined) projectUpdates.panel_height = updates.panelHeight
       if (updates.minWasteSize !== undefined) projectUpdates.min_waste_size = updates.minWasteSize
+      if (updates.poignetEnabled !== undefined) projectUpdates.poignet_enabled = updates.poignetEnabled
       if (updates.isFavorite !== undefined) projectUpdates.is_favorite = updates.isFavorite
       if (updates.tags !== undefined) projectUpdates.tags = updates.tags
 

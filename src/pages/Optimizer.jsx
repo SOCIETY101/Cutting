@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Checkbox } from '../components/ui/checkbox'
 import { Plus, Trash2, Copy, Download, Upload, Save } from 'lucide-react'
 import { useProjects } from '../hooks/useProjects'
+import { PanelVisualization } from '../components/visualization/PanelVisualization'
 
 export function Optimizer({ project, onSaveProject, onSaveResult }) {
   const { createProject } = useProjects()
@@ -34,6 +35,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
   
   // Optimization settings
   const [minWasteSize, setMinWasteSize] = useState(project?.min_waste_size || 100) // mm - waste smaller than this is trash
+  const [poignetEnabled, setPoignetEnabled] = useState(project?.poignet_enabled || false)
   
   // Update state when project changes
   useEffect(() => {
@@ -41,6 +43,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       setPanelWidth(project.panel_width || 1000)
       setPanelHeight(project.panel_height || 1000)
       setMinWasteSize(project.min_waste_size || 100)
+      setPoignetEnabled(project.poignet_enabled || false)
       if (project.pieces && project.pieces.length > 0) {
         setPieces(project.pieces.map((p, index) => ({
           id: p.piece_type_id !== undefined ? p.piece_type_id : index,
@@ -55,7 +58,6 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
 
   // Results state
   const [results, setResults] = useState(null)
-  const [showFreeRects, setShowFreeRects] = useState(false)
   
   // JSON config state
   const [jsonConfig, setJsonConfig] = useState('')
@@ -72,6 +74,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
         },
         settings: {
           minWasteSize: minWasteSize,
+          poignetEnabled: poignetEnabled,
         },
         pieces: pieces.map(p => ({
           id: p.id,
@@ -84,7 +87,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       setJsonConfig(JSON.stringify(config, null, 2))
       setJsonError('')
     }
-  }, [panelWidth, panelHeight, pieces, minWasteSize, autoSync])
+  }, [panelWidth, panelHeight, pieces, minWasteSize, poignetEnabled, autoSync])
 
   // Generate color for piece type (same color for all pieces of same type)
   const getPieceTypeColor = (pieceTypeId) => {
@@ -98,7 +101,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
 
   // Handle optimization
   const handleOptimize = () => {
-    const result = optimize(panelWidth, panelHeight, pieces, { minWasteSize })
+    const result = optimize(panelWidth, panelHeight, pieces, { minWasteSize, poignetEnabled })
     setResults(result)
     
     // Save result if callback provided
@@ -114,6 +117,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
         panelWidth,
         panelHeight,
         minWasteSize,
+        poignetEnabled,
         pieces,
       }
       
@@ -143,8 +147,8 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       { id: 1, width: 100, height: 100, quantity: 10, rotationAllowed: true },
     ])
     setMinWasteSize(100)
+    setPoignetEnabled(false)
     setResults(null)
-    setShowFreeRects(false)
   }
 
   // Add new piece (rotation enabled by default)
@@ -232,8 +236,13 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       setPieces(importedPieces)
       
       // Import settings if available
-      if (config.settings && typeof config.settings.minWasteSize === 'number') {
-        setMinWasteSize(config.settings.minWasteSize)
+      if (config.settings) {
+        if (typeof config.settings.minWasteSize === 'number') {
+          setMinWasteSize(config.settings.minWasteSize)
+        }
+        if (typeof config.settings.poignetEnabled === 'boolean') {
+          setPoignetEnabled(config.settings.poignetEnabled)
+        }
       }
       
       setJsonError('')
@@ -267,6 +276,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       },
       settings: {
         minWasteSize: 100,
+        poignetEnabled: false,
       },
       pieces: [
         { id: 0, width: 600, height: 400, quantity: 8, rotationAllowed: true },
@@ -381,7 +391,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     />
                   </div>
                 </div>
-                <div className="pt-2 border-t">
+                <div className="pt-2 border-t space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="min-waste-size">Minimum Useful Waste Size (mm)</Label>
                     <div className="flex items-center gap-2">
@@ -396,6 +406,21 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                       <span className="text-xs text-muted-foreground">
                         Waste smaller than {minWasteSize}×{minWasteSize}mm is discarded
                       </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 pt-2 border-t">
+                    <Checkbox
+                      id="poignet-enabled"
+                      checked={poignetEnabled}
+                      onChange={(e) => setPoignetEnabled(e.target.checked)}
+                    />
+                    <div className="space-y-1">
+                      <Label htmlFor="poignet-enabled" className="text-sm font-medium cursor-pointer">
+                        Poignet Mode
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Pieces will be placed only at top or bottom rows (width edges align with panel edges)
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -576,16 +601,6 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center space-x-2 pt-2 border-t">
-                      <Checkbox
-                        id="show-free-rects"
-                        checked={showFreeRects}
-                        onChange={(e) => setShowFreeRects(e.target.checked)}
-                      />
-                      <Label htmlFor="show-free-rects" className="text-sm cursor-pointer">
-                        Show free rectangles
-                      </Label>
-                    </div>
                     {/* Piece Type Legend */}
                     {results.panels.length > 0 && (
                       <div className="pt-2 border-t">
@@ -615,12 +630,14 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     <CardTitle>Visualization</CardTitle>
                     <CardDescription>
                       {results.stats.panelCount} Panel{results.stats.panelCount !== 1 ? 's' : ''}: {panelWidth}mm × {panelHeight}mm each
+                      {poignetEnabled && (
+                        <span className="ml-2 text-primary font-medium">• Poignet Mode Active</span>
+                      )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
                       {results.panels.map((panel, panelIdx) => {
-                        const allPlaced = results.panels.flatMap(p => p.placed)
                         const panelPlacedCount = panel.placed.length
                         return (
                           <div key={`panel-${panelIdx}`} className="space-y-2">
@@ -629,77 +646,14 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                                 Panel {panelIdx + 1} ({panelPlacedCount} pieces)
                               </h3>
                             </div>
-                            <div className="w-full flex justify-center bg-muted/30 rounded-lg p-4">
-                              <svg
-                                width="600"
-                                height="600"
-                                viewBox={`0 0 ${panelWidth} ${panelHeight}`}
-                                className="border border-border rounded"
-                                style={{ maxWidth: '100%', height: 'auto' }}
-                              >
-                                {/* Panel outline */}
-                                <rect
-                                  x="0"
-                                  y="0"
-                                  width={panelWidth}
-                                  height={panelHeight}
-                                  fill="white"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                />
-
-                                {/* Free rectangles (optional) */}
-                                {showFreeRects &&
-                                  panel.freeRects &&
-                                  panel.freeRects.map((rect, index) => (
-                                    <rect
-                                      key={`free-${panelIdx}-${index}`}
-                                      x={rect.x}
-                                      y={rect.y}
-                                      width={rect.width}
-                                      height={rect.height}
-                                      fill="none"
-                                      stroke="#94a3b8"
-                                      strokeWidth="1"
-                                      strokeDasharray="4 4"
-                                      opacity="0.5"
-                                    />
-                                  ))}
-
-                                {/* Placed rectangles */}
-                                {panel.placed.map((rect, index) => {
-                                  const color = getPieceTypeColor(rect.pieceTypeId)
-                                  return (
-                                    <g key={`placed-${panelIdx}-${index}`}>
-                                      <rect
-                                        x={rect.x}
-                                        y={rect.y}
-                                        width={rect.width}
-                                        height={rect.height}
-                                        fill={color}
-                                        fillOpacity="0.7"
-                                        stroke="currentColor"
-                                        strokeWidth="1"
-                                      />
-                                      {/* Label with dimensions */}
-                                      {rect.width > 50 && rect.height > 30 && (
-                                        <text
-                                          x={rect.x + rect.width / 2}
-                                          y={rect.y + rect.height / 2}
-                                          textAnchor="middle"
-                                          dominantBaseline="middle"
-                                          className="text-xs font-medium fill-foreground"
-                                          fontSize="12"
-                                        >
-                                          {Math.round(rect.width)}×{Math.round(rect.height)}
-                                          {rect.rotated && ' (R)'}
-                                        </text>
-                                      )}
-                                    </g>
-                                  )
-                                })}
-                              </svg>
-                            </div>
+                            <PanelVisualization
+                              panel={panel}
+                              width={panelWidth}
+                              height={panelHeight}
+                              index={panelIdx}
+                              poignetEnabled={poignetEnabled}
+                              minWasteSize={minWasteSize}
+                            />
                           </div>
                         )
                       })}
