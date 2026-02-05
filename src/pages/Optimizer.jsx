@@ -126,15 +126,15 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
         await onSaveProject(projectData)
       } else {
         // Fallback: create new project directly
-        const name = prompt('Enter project name:') || 'Untitled Project'
+        const name = prompt('Entrez le nom du projet :') || 'Projet sans titre'
         await createProject({
           name,
           ...projectData,
         })
-        alert('Project saved!')
+        alert('Projet sauvegardé !')
       }
     } catch (error) {
-      alert('Failed to save project: ' + error.message)
+      alert('Échec de la sauvegarde du projet : ' + error.message)
     }
   }
 
@@ -214,11 +214,11 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       
       // Validate structure
       if (!config.panel || typeof config.panel.width !== 'number' || typeof config.panel.height !== 'number') {
-        throw new Error('Invalid panel configuration')
+        throw new Error('Configuration du panneau invalide')
       }
       
       if (!Array.isArray(config.pieces)) {
-        throw new Error('Pieces must be an array')
+        throw new Error('Les pièces doivent être un tableau')
       }
       
       // Validate and import pieces (default rotationAllowed to true for wood cutting)
@@ -250,7 +250,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       
       return true
     } catch (error) {
-      setJsonError(error.message || 'Invalid JSON format')
+      setJsonError(error.message || 'Format JSON invalide')
       return false
     }
   }
@@ -263,7 +263,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
       setJsonError('')
       // You could add a toast notification here
     } catch (error) {
-      setJsonError('Failed to copy to clipboard')
+      setJsonError('Échec de la copie dans le presse-papiers')
     }
   }
 
@@ -292,9 +292,9 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">2D Cutting Optimization</h1>
+          <h1 className="text-4xl font-bold mb-2">Optimisation de découpe 2D</h1>
           <p className="text-muted-foreground">
-            Guillotine-based MaxRects Bin Packing Algorithm
+            Algorithme de bin packing MaxRects basé sur la guillotine
           </p>
         </div>
 
@@ -306,16 +306,16 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>JSON Configuration</CardTitle>
-                    <CardDescription>Copy/paste configuration for quick testing</CardDescription>
+                    <CardTitle>Configuration JSON</CardTitle>
+                    <CardDescription>Copier/coller la configuration pour des tests rapides</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={exportToJSON} size="sm" variant="outline">
                       <Download className="h-4 w-4 mr-1" />
-                      Export
+                      Exporter
                     </Button>
                     <Button onClick={loadExample} size="sm" variant="outline">
-                      Example
+                      Exemple
                     </Button>
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     onChange={(e) => setAutoSync(e.target.checked)}
                   />
                   <Label htmlFor="auto-sync" className="text-sm cursor-pointer">
-                    Auto-sync with form (updates JSON as you edit)
+                    Synchronisation automatique avec le formulaire (met à jour le JSON pendant l'édition)
                   </Label>
                 </div>
                 <div className="relative">
@@ -352,11 +352,11 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                 <div className="flex gap-2">
                   <Button onClick={importFromJSON} className="flex-1" size="sm">
                     <Upload className="h-4 w-4 mr-2" />
-                    Load Configuration
+                    Charger la configuration
                   </Button>
                   <Button onClick={copyToClipboard} variant="outline" size="sm">
                     <Copy className="h-4 w-4 mr-2" />
-                    Copy
+                    Copier
                   </Button>
                 </div>
               </CardContent>
@@ -365,13 +365,13 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
             {/* Panel Definition */}
             <Card>
               <CardHeader>
-                <CardTitle>Panel Definition</CardTitle>
-                <CardDescription>Define the panel dimensions in millimeters</CardDescription>
+                <CardTitle>Définition du panneau</CardTitle>
+                <CardDescription>Définir les dimensions du panneau en millimètres</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="panel-width">Width (mm)</Label>
+                    <Label htmlFor="panel-width">Largeur (mm)</Label>
                     <Input
                       id="panel-width"
                       type="number"
@@ -381,7 +381,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="panel-height">Height (mm)</Label>
+                    <Label htmlFor="panel-height">Hauteur (mm)</Label>
                     <Input
                       id="panel-height"
                       type="number"
@@ -393,7 +393,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                 </div>
                 <div className="pt-2 border-t space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="min-waste-size">Minimum Useful Waste Size (mm)</Label>
+                    <Label htmlFor="min-waste-size">Taille minimale des chutes utiles (mm)</Label>
                     <div className="flex items-center gap-2">
                       <Input
                         id="min-waste-size"
@@ -404,7 +404,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                         className="w-32"
                       />
                       <span className="text-xs text-muted-foreground">
-                        Waste smaller than {minWasteSize}×{minWasteSize}mm is discarded
+                        Les chutes plus petites que {minWasteSize}×{minWasteSize}mm sont ignorées
                       </span>
                     </div>
                   </div>
@@ -416,10 +416,10 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     />
                     <div className="space-y-1">
                       <Label htmlFor="poignet-enabled" className="text-sm font-medium cursor-pointer">
-                        Poignet Mode
+                        Mode Poignet
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        Pieces will be placed only at top or bottom rows (width edges align with panel edges)
+                        Les pièces seront placées uniquement en haut ou en bas (les bords de largeur s'alignent avec les bords du panneau)
                       </p>
                     </div>
                   </div>
@@ -432,12 +432,12 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Pieces Definition</CardTitle>
-                    <CardDescription>Define pieces to be cut from the panel</CardDescription>
+                    <CardTitle>Définition des pièces</CardTitle>
+                    <CardDescription>Définir les pièces à découper du panneau</CardDescription>
                   </div>
                   <Button onClick={handleAddPiece} size="sm" variant="outline">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Piece
+                    Ajouter une pièce
                   </Button>
                 </div>
               </CardHeader>
@@ -448,7 +448,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     className="p-4 border rounded-lg space-y-3 bg-muted/50"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Piece #{piece.id + 1}</span>
+                      <span className="text-sm font-medium">Pièce #{piece.id + 1}</span>
                       <Button
                         onClick={() => handleRemovePiece(piece.id)}
                         size="sm"
@@ -461,7 +461,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor={`width-${piece.id}`} className="text-xs">
-                          Width (mm)
+                          Largeur (mm)
                         </Label>
                         <Input
                           id={`width-${piece.id}`}
@@ -476,7 +476,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`height-${piece.id}`} className="text-xs">
-                          Height (mm)
+                          Hauteur (mm)
                         </Label>
                         <Input
                           id={`height-${piece.id}`}
@@ -491,7 +491,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`quantity-${piece.id}`} className="text-xs">
-                          Quantity
+                          Quantité
                         </Label>
                         <Input
                           id={`quantity-${piece.id}`}
@@ -517,14 +517,14 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                         htmlFor={`rotation-${piece.id}`}
                         className="text-sm cursor-pointer"
                       >
-                        Allow rotation
+                        Autoriser la rotation
                       </Label>
                     </div>
                   </div>
                 ))}
                 {pieces.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No pieces defined. Click "Add Piece" to add one.
+                    Aucune pièce définie. Cliquez sur "Ajouter une pièce" pour en ajouter une.
                   </p>
                 )}
               </CardContent>
@@ -533,14 +533,14 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
             {/* Control Buttons */}
             <div className="flex gap-3">
               <Button onClick={handleOptimize} className="flex-1" size="lg">
-                Generate Optimization
+                Générer l'optimisation
               </Button>
               <Button onClick={handleSaveProject} variant="outline" size="lg">
                 <Save className="h-4 w-4 mr-2" />
-                Save Project
+                Sauvegarder le projet
               </Button>
               <Button onClick={handleReset} variant="secondary" size="lg">
-                Reset
+                Réinitialiser
               </Button>
             </div>
           </div>
@@ -552,12 +552,12 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                 {/* Statistics */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Optimization Results</CardTitle>
+                    <CardTitle>Résultats de l'optimisation</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Used Area</p>
+                        <p className="text-sm text-muted-foreground">Surface utilisée</p>
                         <p className="text-2xl font-bold">
                           {results.stats.usedPercentage.toFixed(2)}%
                         </p>
@@ -566,7 +566,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                         </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Waste</p>
+                        <p className="text-sm text-muted-foreground">Chutes</p>
                         <p className="text-2xl font-bold text-destructive">
                           {results.stats.wastePercentage.toFixed(2)}%
                         </p>
@@ -577,34 +577,34 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                     </div>
                     <div className="pt-2 border-t">
                       <p className="text-sm text-muted-foreground">
-                        Panels Used: <span className="font-medium">{results.stats.panelCount}</span>
+                        Panneaux utilisés : <span className="font-medium">{results.stats.panelCount}</span>
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Total Placed: <span className="font-medium">
+                        Total placé : <span className="font-medium">
                           {results.panels.reduce((sum, p) => sum + p.placed.length, 0)}
-                        </span> pieces
+                        </span> pièce{results.panels.reduce((sum, p) => sum + p.placed.length, 0) !== 1 ? 's' : ''}
                       </p>
                       {results.stats.usableWasteArea > 0 && (
                         <p className="text-sm text-muted-foreground">
-                          Reusable Waste: <span className="font-medium">
+                          Chutes réutilisables : <span className="font-medium">
                             {(results.stats.usableWasteArea / 1000000).toFixed(3)} m²
                           </span>
                           <span className="text-xs ml-1">
-                            ({results.panels.reduce((sum, p) => sum + p.freeRects.length, 0)} pieces)
+                            ({results.panels.reduce((sum, p) => sum + p.freeRects.length, 0)} pièce{results.panels.reduce((sum, p) => sum + p.freeRects.length, 0) !== 1 ? 's' : ''})
                           </span>
                         </p>
                       )}
                       {results.rejected.length > 0 && (
                         <p className="text-sm text-destructive">
-                          Rejected: <span className="font-medium">{results.rejected.length}</span>{' '}
-                          pieces
+                          Rejeté{results.rejected.length !== 1 ? 's' : ''} : <span className="font-medium">{results.rejected.length}</span>{' '}
+                          pièce{results.rejected.length !== 1 ? 's' : ''}
                         </p>
                       )}
                     </div>
                     {/* Piece Type Legend */}
                     {results.panels.length > 0 && (
                       <div className="pt-2 border-t">
-                        <p className="text-sm font-medium mb-2">Piece Colors:</p>
+                        <p className="text-sm font-medium mb-2">Couleurs des pièces :</p>
                         <div className="flex flex-wrap gap-2">
                           {pieces.map((piece) => (
                             <div
@@ -615,7 +615,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                                 className="w-4 h-4 rounded border border-border"
                                 style={{ backgroundColor: getPieceTypeColor(piece.id) }}
                               />
-                              <span>Piece #{piece.id + 1}</span>
+                              <span>Pièce #{piece.id + 1}</span>
                             </div>
                           ))}
                         </div>
@@ -627,11 +627,11 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                 {/* Visualization - Multiple Panels */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Visualization</CardTitle>
+                    <CardTitle>Visualisation</CardTitle>
                     <CardDescription>
-                      {results.stats.panelCount} Panel{results.stats.panelCount !== 1 ? 's' : ''}: {panelWidth}mm × {panelHeight}mm each
+                      {results.stats.panelCount} Panneau{results.stats.panelCount !== 1 ? 'x' : ''} : {panelWidth}mm × {panelHeight}mm chacun
                       {poignetEnabled && (
-                        <span className="ml-2 text-primary font-medium">• Poignet Mode Active</span>
+                        <span className="ml-2 text-primary font-medium">• Mode Poignet actif</span>
                       )}
                     </CardDescription>
                   </CardHeader>
@@ -643,7 +643,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                           <div key={`panel-${panelIdx}`} className="space-y-2">
                             <div className="flex items-center justify-between">
                               <h3 className="text-sm font-semibold">
-                                Panel {panelIdx + 1} ({panelPlacedCount} pieces)
+                                Panneau {panelIdx + 1} ({panelPlacedCount} pièce{panelPlacedCount !== 1 ? 's' : ''})
                               </h3>
                             </div>
                             <PanelVisualization
@@ -666,7 +666,7 @@ export function Optimizer({ project, onSaveProject, onSaveResult }) {
                 <CardContent className="flex items-center justify-center h-96">
                   <div className="text-center space-y-2">
                     <p className="text-muted-foreground">
-                      Click "Generate Optimization" to see results
+                      Cliquez sur "Générer l'optimisation" pour voir les résultats
                     </p>
                   </div>
                 </CardContent>

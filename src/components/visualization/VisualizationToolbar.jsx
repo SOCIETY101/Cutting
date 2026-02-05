@@ -33,16 +33,16 @@ export function VisualizationToolbar({
     <div className="flex flex-wrap items-center justify-between gap-4 p-3 border-b bg-muted/20">
       {/* Zoom Controls */}
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" onClick={onZoomOut} title="Zoom Out">
+        <Button variant="ghost" size="icon" onClick={onZoomOut} title="Dézoomer">
           <ZoomOut className="h-4 w-4" />
         </Button>
         <span className="text-xs font-mono w-12 text-center">
           {Math.round(scale * 100)}%
         </span>
-        <Button variant="ghost" size="icon" onClick={onZoomIn} title="Zoom In">
+        <Button variant="ghost" size="icon" onClick={onZoomIn} title="Zoomer">
           <ZoomIn className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={onReset} title="Reset View">
+        <Button variant="ghost" size="icon" onClick={onReset} title="Réinitialiser la vue">
           <Maximize className="h-4 w-4" />
         </Button>
       </div>
@@ -67,7 +67,7 @@ export function VisualizationToolbar({
             onChange={(e) => onToggleIDs(e.target.checked)}
           />
           <span className="text-xs flex items-center gap-1">
-            <Hash className="h-3 w-3" /> IDs
+            <Hash className="h-3 w-3" /> Identifiants
           </span>
         </label>
 
@@ -78,7 +78,7 @@ export function VisualizationToolbar({
             onChange={(e) => onToggleWaste(e.target.checked)}
           />
           <span className="text-xs flex items-center gap-1">
-            <Trash2 className="h-3 w-3" /> Waste
+            <Trash2 className="h-3 w-3" /> Chutes
           </span>
         </label>
 
@@ -100,7 +100,7 @@ export function VisualizationToolbar({
       <div>
         <Button variant="outline" size="sm" onClick={onExport} className="h-8 gap-2">
           <Download className="h-3 w-3" />
-          Export SVG
+          Exporter SVG
         </Button>
       </div>
     </div>

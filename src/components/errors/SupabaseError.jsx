@@ -8,27 +8,27 @@ export function SupabaseError() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-5 w-5" />
-            Configuration Error
+            Erreur de configuration
           </CardTitle>
-          <CardDescription>Supabase credentials are missing</CardDescription>
+          <CardDescription>Les identifiants Supabase sont manquants</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            To use this application, you need to configure Supabase:
+            Pour utiliser cette application, vous devez configurer Supabase :
           </p>
           <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-            <li>Create a <code className="bg-muted px-1 rounded">.env</code> file in the project root</li>
-            <li>Add your Supabase credentials:
+            <li>Créez un fichier <code className="bg-muted px-1 rounded">.env</code> à la racine du projet</li>
+            <li>Ajoutez vos identifiants Supabase :
               <pre className="mt-2 p-3 bg-muted rounded text-xs overflow-x-auto">
 {`VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
               </pre>
             </li>
-            <li>Restart the dev server</li>
+            <li>Redémarrez le serveur de développement</li>
           </ol>
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground">
-              See <code className="bg-muted px-1 rounded">SETUP.md</code> for detailed instructions.
+              Voir <code className="bg-muted px-1 rounded">SETUP.md</code> pour des instructions détaillées.
             </p>
           </div>
         </CardContent>

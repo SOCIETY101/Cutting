@@ -23,7 +23,7 @@ export function LoginForm({ onSwitchToSignUp, onSuccess }) {
       if (signInError) throw signInError
       if (onSuccess) onSuccess()
     } catch (err) {
-      setError(err.message || 'Failed to sign in')
+      setError(err.message || 'Échec de la connexion')
     } finally {
       setLoading(false)
     }
@@ -34,9 +34,9 @@ export function LoginForm({ onSwitchToSignUp, onSuccess }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <LogIn className="h-5 w-5" />
-          Sign In
+          Connexion
         </CardTitle>
-        <CardDescription>Sign in to access your projects</CardDescription>
+        <CardDescription>Connectez-vous pour accéder à vos projets</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,7 +47,7 @@ export function LoginForm({ onSwitchToSignUp, onSuccess }) {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -63,7 +63,7 @@ export function LoginForm({ onSwitchToSignUp, onSuccess }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -79,7 +79,7 @@ export function LoginForm({ onSwitchToSignUp, onSuccess }) {
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Connexion...' : 'Se connecter'}
           </Button>
 
           <div className="text-center text-sm">
@@ -88,7 +88,7 @@ export function LoginForm({ onSwitchToSignUp, onSuccess }) {
               onClick={onSwitchToSignUp}
               className="text-primary hover:underline"
             >
-              Don't have an account? Sign up
+              Vous n'avez pas de compte ? S'inscrire
             </button>
           </div>
         </form>

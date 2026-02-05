@@ -9,36 +9,36 @@ export function DatabaseError() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <Database className="h-5 w-5" />
-            Database Setup Required
+            Configuration de la base de données requise
           </CardTitle>
           <CardDescription>
-            The database tables need to be created before you can use this app
+            Les tables de la base de données doivent être créées avant de pouvoir utiliser cette application
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="bg-muted p-4 rounded-lg">
-            <p className="text-sm font-medium mb-2">Quick Setup Steps:</p>
+            <p className="text-sm font-medium mb-2">Étapes de configuration rapide :</p>
             <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-              <li>Go to your Supabase project dashboard</li>
-              <li>Click on <strong>SQL Editor</strong> in the left sidebar</li>
-              <li>Click <strong>New Query</strong></li>
-              <li>Open the file <code className="bg-background px-1 rounded">supabase/schema.sql</code> from this project</li>
-              <li>Copy the <strong>entire contents</strong> and paste into SQL Editor</li>
-              <li>Click <strong>Run</strong> (or press Cmd/Ctrl + Enter)</li>
-              <li>Refresh this page</li>
+              <li>Allez sur le tableau de bord de votre projet Supabase</li>
+              <li>Cliquez sur <strong>Éditeur SQL</strong> dans la barre latérale gauche</li>
+              <li>Cliquez sur <strong>Nouvelle requête</strong></li>
+              <li>Ouvrez le fichier <code className="bg-background px-1 rounded">supabase/schema.sql</code> de ce projet</li>
+              <li>Copiez le <strong>contenu entier</strong> et collez-le dans l'éditeur SQL</li>
+              <li>Cliquez sur <strong>Exécuter</strong> (ou appuyez sur Cmd/Ctrl + Entrée)</li>
+              <li>Actualisez cette page</li>
             </ol>
           </div>
 
           <div className="pt-4 border-t">
             <p className="text-sm text-muted-foreground mb-4">
-              The schema will create:
+              Le schéma créera :
             </p>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><code className="bg-muted px-1 rounded">projects</code> table</li>
-              <li><code className="bg-muted px-1 rounded">pieces</code> table</li>
-              <li><code className="bg-muted px-1 rounded">optimization_results</code> table</li>
-              <li>Row Level Security policies</li>
-              <li>Indexes for performance</li>
+              <li>La table <code className="bg-muted px-1 rounded">projects</code></li>
+              <li>La table <code className="bg-muted px-1 rounded">pieces</code></li>
+              <li>La table <code className="bg-muted px-1 rounded">optimization_results</code></li>
+              <li>Les politiques de sécurité au niveau des lignes</li>
+              <li>Les index pour les performances</li>
             </ul>
           </div>
 
@@ -48,19 +48,19 @@ export function DatabaseError() {
               onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
             >
               <ExternalLink className="h-4 w-4 mr-2" />
-              Open Supabase Dashboard
+              Ouvrir le tableau de bord Supabase
             </Button>
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
             >
-              Refresh Page
+              Actualiser la page
             </Button>
           </div>
 
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground">
-              See <code className="bg-muted px-1 rounded">DATABASE_SETUP.md</code> for detailed instructions.
+              Voir <code className="bg-muted px-1 rounded">DATABASE_SETUP.md</code> pour des instructions détaillées.
             </p>
           </div>
         </CardContent>

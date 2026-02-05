@@ -22,7 +22,7 @@ export function ProjectCard({ project, onClick, onEdit, onDelete, onDuplicate })
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('fr-FR', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -67,12 +67,12 @@ export function ProjectCard({ project, onClick, onEdit, onDelete, onDuplicate })
               {formatDate(project.updated_at)}
             </div>
             <div>
-              {project.pieces?.length || 0} piece{project.pieces?.length !== 1 ? 's' : ''}
+              {project.pieces?.length || 0} pièce{project.pieces?.length !== 1 ? 's' : ''}
             </div>
           </div>
 
           <div className="text-xs text-muted-foreground">
-            Panel: {project.panel_width}×{project.panel_height}mm
+            Panneau : {project.panel_width}×{project.panel_height}mm
           </div>
 
           {project.tags && project.tags.length > 0 && (
@@ -96,7 +96,7 @@ export function ProjectCard({ project, onClick, onEdit, onDelete, onDuplicate })
               className="flex-1"
             >
               <Edit className="h-3 w-3 mr-1" />
-              Edit
+              Modifier
             </Button>
             <Button
               variant="outline"

@@ -513,21 +513,21 @@ export function PanelVisualization({
               transform: 'translate(-50%, -100%)'
             }}
           >
-            <div className="font-semibold">Piece #{hoveredPiece.pieceId + 1}</div>
+            <div className="font-semibold">Pièce #{hoveredPiece.pieceId + 1}</div>
             <div className="text-muted-foreground">
               {Math.round(hoveredPiece.width)} × {Math.round(hoveredPiece.height)} mm
             </div>
-            {hoveredPiece.rotated && <div className="text-amber-600 text-xs">Rotated</div>}
+            {hoveredPiece.rotated && <div className="text-amber-600 text-xs">Tourné</div>}
             <div className="text-xs mt-1 font-mono">
-              X: {Math.round(hoveredPiece.x)}, Y: {Math.round(hoveredPiece.y)}
+              X : {Math.round(hoveredPiece.x)}, Y : {Math.round(hoveredPiece.y)}
             </div>
           </div>
         )}
       </div>
       
       <div className="bg-muted/10 p-2 text-xs text-muted-foreground flex justify-between border-t">
-         <span>{panel.placed.length} pieces placed</span>
-         <span>Drag to pan • Ctrl+Scroll to zoom</span>
+         <span>{panel.placed.length} pièce{panel.placed.length !== 1 ? 's' : ''} placée{panel.placed.length !== 1 ? 's' : ''}</span>
+         <span>Glisser pour déplacer • Ctrl+Molette pour zoomer</span>
       </div>
     </div>
   )

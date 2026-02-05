@@ -40,20 +40,20 @@ export function ProjectForm({ project, onSave, onCancel }) {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>{project ? 'Edit Project' : 'New Project'}</CardTitle>
+        <CardTitle>{project ? 'Modifier le projet' : 'Nouveau projet'}</CardTitle>
         <CardDescription>
-          {project ? 'Update project settings' : 'Create a new cutting project'}
+          {project ? 'Mettre à jour les paramètres du projet' : 'Créer un nouveau projet de découpe'}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project-name">Project Name *</Label>
+            <Label htmlFor="project-name">Nom du projet *</Label>
             <Input
               id="project-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Kitchen Cabinets"
+              placeholder="ex. : Armoires de cuisine"
               required
             />
           </div>
@@ -64,14 +64,14 @@ export function ProjectForm({ project, onSave, onCancel }) {
               id="project-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description..."
+              placeholder="Description optionnelle..."
               className="w-full min-h-[80px] px-3 py-2 text-sm border border-input rounded-md bg-background resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="panel-width">Panel Width (mm) *</Label>
+              <Label htmlFor="panel-width">Largeur du panneau (mm) *</Label>
               <Input
                 id="panel-width"
                 type="number"
@@ -82,7 +82,7 @@ export function ProjectForm({ project, onSave, onCancel }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="panel-height">Panel Height (mm) *</Label>
+              <Label htmlFor="panel-height">Hauteur du panneau (mm) *</Label>
               <Input
                 id="panel-height"
                 type="number"
@@ -95,7 +95,7 @@ export function ProjectForm({ project, onSave, onCancel }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="min-waste-size">Minimum Waste Size (mm)</Label>
+            <Label htmlFor="min-waste-size">Taille minimale des chutes (mm)</Label>
             <Input
               id="min-waste-size"
               type="number"
@@ -104,7 +104,7 @@ export function ProjectForm({ project, onSave, onCancel }) {
               onChange={(e) => setMinWasteSize(Number(e.target.value))}
             />
             <p className="text-xs text-muted-foreground">
-              Waste smaller than this size will be discarded
+              Les chutes plus petites que cette taille seront ignorées
             </p>
           </div>
 
@@ -116,20 +116,20 @@ export function ProjectForm({ project, onSave, onCancel }) {
             />
             <div className="space-y-1">
               <Label htmlFor="poignet-enabled-form" className="text-sm font-medium cursor-pointer">
-                Poignet Mode
+                Mode Poignet
               </Label>
               <p className="text-xs text-muted-foreground">
-                Pieces will be placed only at top or bottom rows (width edges align with panel edges)
+                Les pièces seront placées uniquement en haut ou en bas (les bords de largeur s'alignent avec les bords du panneau)
               </p>
             </div>
           </div>
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1">
-              {project ? 'Update Project' : 'Create Project'}
+              {project ? 'Mettre à jour le projet' : 'Créer le projet'}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              Annuler
             </Button>
           </div>
         </form>

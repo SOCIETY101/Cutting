@@ -20,11 +20,11 @@ export function ProjectList({ onSelectProject, onCreateProject, onEditProject })
 
   const handleDelete = async (projectId, e) => {
     e.stopPropagation()
-    if (confirm('Are you sure you want to delete this project?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
       try {
         await deleteProject(projectId)
       } catch (error) {
-        alert('Failed to delete project: ' + error.message)
+        alert('Échec de la suppression du projet : ' + error.message)
       }
     }
   }
@@ -34,14 +34,14 @@ export function ProjectList({ onSelectProject, onCreateProject, onEditProject })
     try {
       await duplicateProject(projectId)
     } catch (error) {
-      alert('Failed to duplicate project: ' + error.message)
+      alert('Échec de la duplication du projet : ' + error.message)
     }
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading projects...</p>
+        <p className="text-muted-foreground">Chargement des projets...</p>
       </div>
     )
   }
@@ -50,14 +50,14 @@ export function ProjectList({ onSelectProject, onCreateProject, onEditProject })
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">My Projects</h2>
+          <h2 className="text-2xl font-bold">Mes projets</h2>
           <p className="text-muted-foreground">
-            {projects.length} project{projects.length !== 1 ? 's' : ''}
+            {projects.length} projet{projects.length !== 1 ? 's' : ''}
           </p>
         </div>
         <Button onClick={onCreateProject}>
           <Plus className="h-4 w-4 mr-2" />
-          New Project
+          Nouveau projet
         </Button>
       </div>
 
@@ -65,7 +65,7 @@ export function ProjectList({ onSelectProject, onCreateProject, onEditProject })
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search projects..."
+            placeholder="Rechercher des projets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -76,7 +76,7 @@ export function ProjectList({ onSelectProject, onCreateProject, onEditProject })
           onClick={() => setFilterFavorite(!filterFavorite)}
         >
           <Star className={`h-4 w-4 mr-2 ${filterFavorite ? 'fill-current' : ''}`} />
-          Favorites
+          Favoris
         </Button>
       </div>
 
@@ -85,13 +85,13 @@ export function ProjectList({ onSelectProject, onCreateProject, onEditProject })
           <CardContent className="flex flex-col items-center justify-center py-12">
             <p className="text-muted-foreground mb-4">
               {projects.length === 0
-                ? 'No projects yet. Create your first project to get started!'
-                : 'No projects match your search'}
+                ? 'Aucun projet pour le moment. Créez votre premier projet pour commencer !'
+                : 'Aucun projet ne correspond à votre recherche'}
             </p>
             {projects.length === 0 && (
               <Button onClick={onCreateProject}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Project
+                Créer un projet
               </Button>
             )}
           </CardContent>

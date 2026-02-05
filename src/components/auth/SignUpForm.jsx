@@ -19,12 +19,12 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('Les mots de passe ne correspondent pas')
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError('Le mot de passe doit contenir au moins 6 caractères')
       return
     }
 
@@ -36,10 +36,10 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
       
       // Show success message
       setError('')
-      alert('Account created! Please check your email to verify your account.')
+      alert('Compte créé ! Veuillez vérifier votre e-mail pour confirmer votre compte.')
       if (onSuccess) onSuccess()
     } catch (err) {
-      setError(err.message || 'Failed to create account')
+      setError(err.message || 'Échec de la création du compte')
     } finally {
       setLoading(false)
     }
@@ -50,9 +50,9 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <UserPlus className="h-5 w-5" />
-          Sign Up
+          Inscription
         </CardTitle>
-        <CardDescription>Create an account to save your projects</CardDescription>
+        <CardDescription>Créez un compte pour sauvegarder vos projets</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,7 +63,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="signup-email">Email</Label>
+            <Label htmlFor="signup-email">E-mail</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -79,7 +79,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="signup-password">Password</Label>
+            <Label htmlFor="signup-password">Mot de passe</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -93,11 +93,11 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
                 minLength={6}
               />
             </div>
-            <p className="text-xs text-muted-foreground">At least 6 characters</p>
+            <p className="text-xs text-muted-foreground">Au moins 6 caractères</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -114,7 +114,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Création du compte...' : 'S\'inscrire'}
           </Button>
 
           <div className="text-center text-sm">
@@ -123,7 +123,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }) {
               onClick={onSwitchToLogin}
               className="text-primary hover:underline"
             >
-              Already have an account? Sign in
+              Vous avez déjà un compte ? Se connecter
             </button>
           </div>
         </form>

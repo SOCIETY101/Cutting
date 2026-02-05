@@ -36,7 +36,7 @@ export function ProjectDetail() {
     try {
       if (projectId === 'new') {
         // Create new project
-        const name = prompt('Enter project name:') || 'Untitled Project'
+        const name = prompt('Entrez le nom du projet :') || 'Projet sans titre'
         const newProject = await createProject({
           name,
           ...projectData,
@@ -47,7 +47,7 @@ export function ProjectDetail() {
         await loadProject()
       }
     } catch (error) {
-      alert('Failed to save project: ' + error.message)
+      alert('Échec de la sauvegarde du projet : ' + error.message)
     }
   }
 
@@ -64,7 +64,7 @@ export function ProjectDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading project...</p>
+        <p className="text-muted-foreground">Chargement du projet...</p>
       </div>
     )
   }
@@ -74,7 +74,7 @@ export function ProjectDetail() {
       <div className="mb-6 flex items-center gap-4">
         <Button variant="outline" onClick={() => navigate('/dashboard')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+          Retour au tableau de bord
         </Button>
         {project && (
           <h2 className="text-2xl font-bold">{project.name}</h2>

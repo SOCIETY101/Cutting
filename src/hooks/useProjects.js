@@ -51,7 +51,7 @@ export const useProjects = () => {
       // Check if it's a table not found error
       if (err.code === 'PGRST205' || err.message?.includes('schema cache')) {
         console.error('⚠️ Database tables not found! Please run the schema.sql file in Supabase SQL Editor.')
-        setError('Database tables not found. Please set up the database schema first.')
+        setError('Tables de la base de données introuvables. Veuillez d\'abord configurer le schéma de la base de données.')
       }
     } finally {
       setLoading(false)
